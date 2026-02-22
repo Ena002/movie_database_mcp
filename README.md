@@ -1,36 +1,89 @@
-# Movie Database MCP (SQLite)
+# Movie Database MCP Server (SQLite)
 
-Relational (SQLite) MCP server for managing a movie collection.
+Ovaj projekat predstavlja implementaciju vlastitog MCP (Model Context Protocol) servera koristeći Python i SQLite bazu podataka.
 
-## Requirements satisfied (per assignment)
-- ✅ 3+ MCP tools (CRUD + search)
-- ✅ 1 MCP resource: `collection://stats`
-- ✅ External integration: SQLite (`movies.db`) with PK/FK relational model
-- ✅ Ready for Claude Desktop integration
+Server je povezan sa Claude Desktop aplikacijom i omogućava upravljanje kolekcijom filmova putem prirodnog jezika.
 
-## Relational model
-- `genres(id PK, name UNIQUE)`
-- `movies(id PK, title, director, year, rating, genre_id FK -> genres.id, created_at)`
+---
 
-## Run (macOS)
-```bash
+## Opis projekta
+
+Cilj projekta je izrada funkcionalnog MCP servera koji rješava realan problem – upravljanje ličnom bazom filmova.
+
+Server omogućava:
+
+- Dodavanje filmova
+- Pretragu filmova
+- Ažuriranje ocjene
+- Brisanje filmova
+- Brojanje filmova
+- Prikaz najbolje ocijenjenih filmova
+- Prikaz statistike kolekcije
+
+Podaci se čuvaju u lokalnoj SQLite bazi.
+
+---
+
+## Arhitektura sistema
+
+Claude Desktop  
+        │  
+        ▼  
+FastMCP server (Python)  
+        │  
+        ▼  
+SQLite baza podataka (movies.db)
+
+Claude komunicira sa serverom putem MCP protokola, a server koristi SQLite kao relacijski datastore.
+
+---
+
+## Struktura baze podataka
+
+Baza koristi relacijski model sa dvije tabele:
+
+- `genres` – čuva nazive žanrova
+- `movies` – čuva informacije o filmovima i sadrži strani ključ (genre_id) koji referencira tabelu `genres`
+
+Jedan žanr može imati više filmova (1:N relacija).
+
+Ovakav dizajn sprječava dupliranje podataka i prati principe relacijskih baza podataka.
+
+---
+
+## MCP alati (Tools)
+
+Server implementira sljedeće alate:
+
+- add_movie
+- find_movies
+- update_rating
+- delete_movie
+- count_movies
+- get_top_movies
+- get_movie_details
+
+Svaki alat ima definisane ulazne parametre i error handling.
+
+---
+
+## MCP Resource
+
+Resource:
+
+collection://stats
+
+Vraća:
+
+- Ukupan broj filmova
+- Prosječnu ocjenu
+- Broj filmova po žanru
+
+---
+
+## Instalacija (macOS)
+
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python movie-mcp.py
-```
-
-## Claude Desktop config (example)
-Set `command` to your venv python path.
-
-```json
-{
-  "mcpServers": {
-    "Movie Database": {
-      "command": "/ABS/PATH/movie-database-mcp-sqlite/venv/bin/python",
-      "args": ["movie-mcp.py"],
-      "cwd": "/ABS/PATH/movie-database-mcp-sqlite"
-    }
-  }
-}
-```
+python movie_mcp.py
