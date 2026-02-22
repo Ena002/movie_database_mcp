@@ -33,7 +33,6 @@ def init_db():
     )
     """)
 
-    # Seed genres
     for g in ("Drama", "Sci-Fi", "Comedy", "Action"):
         cursor.execute("INSERT OR IGNORE INTO genres (name) VALUES (?)", (g,))
 
@@ -44,7 +43,6 @@ def init_db():
     cursor.execute("SELECT id FROM genres WHERE name='Action'")
     action_id = cursor.fetchone()[0]
 
-    # Seed movies (idempotent-ish by title+year)
     seed = [
         ("The Shawshank Redemption", "Frank Darabont", 1994, 9.3, drama_id),
         ("Interstellar", "Christopher Nolan", 2014, 8.6, scifi_id),
@@ -114,9 +112,8 @@ def find_movies(title: str = None, genre: str = None, actor: str = None, year: i
         query += " AND movies.rating >= ?"
         params.append(min_rating)
 
-    # actor is not supported in this simplified relational schema
     if actor:
-        query += " AND 1=0"  # return empty if actor filter used
+        query += " AND 1=0"  
 
     query += " ORDER BY movies.rating DESC LIMIT ?"
     params.append(int(limit))
